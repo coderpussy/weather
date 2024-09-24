@@ -170,11 +170,3 @@ void readESPCoreTemp(struct sensorData *environment)
   environment->coreF = coreF;
   environment->coreC = coreC;
 }
-
-
-void printADCLCD( void)
-{
-  int adc;
-  adc = analogRead(VOLT_PIN);
-  display.printf("ADC: %i\n", adc);
-}

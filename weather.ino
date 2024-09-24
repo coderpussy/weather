@@ -3,13 +3,28 @@
 // jhughes1010@gmail.com
 //
 //Supporting the following project: https://www.instructables.com/Solar-Powered-WiFi-Weather-Station-V30/
+//
+// partially recoded by coderpussy
 
-#define VERSION "1.3.3"
+#define VERSION "1.3.4"
 
 //=============================================
 // Changelog
 //=============================================
 /*
+ * v1.3.4
+ *      1. Removed Blynk, Thingspeak and added local network LAMPP stack based data storage
+ *      2. Adjusted Watchdog timer initialization due to new esp32 board library Major version change v.3.x
+ *         e.g. (https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/)
+ *      3. Removed completely I2C OLED diagnostics cause i need no display for an outdoor device,
+ *         can use other possibilities instead. ;-)
+ *      4. Added easier choose for data transfers (multiple choice possible)
+ *      5. Planned adjustments:
+ *         - Easy way for OTA implementation
+ *         - Various changes in code structure
+ *         - Simple webpage for adjustments (of course with deep sleep interupt)
+ *         - Maybe a webserial implementation
+ *      
  * v1.3.3
  *      1. Corrected error with readUV casting an int result / 100. Now casting that operation as a float. I was always receiving a UVIndex of 0
  * 
@@ -44,23 +59,14 @@
         addred rssi topic on mqtt publish listing
 
         clearer reporting to console on sensor.begin statuses. Program should run with no sensors now and not hang
-
-
-
-
-
-
-
-
 */
 
 //===========================================
 // Includes
 //===========================================
 #include "secrets.h"
-#include <esp_wifi.h>
+#include <WiFi.h>
 #include <time.h>
-#include <BlynkSimpleEsp32.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 #include <Wire.h>
@@ -70,18 +76,11 @@
 #include <BME280I2C.h>
 #include <Adafruit_SI1145.h>
 #include <stdarg.h>
-#include <PubSubClient.h>
 #include <soc/soc.h>
 #include <soc/rtc_cntl_reg.h>
 #include <esp_task_wdt.h>
 #include <esp_system.h>
 #include <driver/rtc_io.h>
-//OLED diagnostics board
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-
-#define OLED_RESET 4
-Adafruit_SSD1306 display(OLED_RESET);
 
 //===========================================
 // Defines
@@ -96,7 +95,16 @@ Adafruit_SSD1306 display(OLED_RESET);
 #define TEMP_PIN      4  // DS18B20 hooked up to GPIO pin 4
 #define LED_BUILTIN   2  //Diagnostics using built-in LED, may be set to 12 for newer boards that do not use devkit sockets
 #define SEC 1E6          //Multiplier for uS based math
-#define WDT_TIMEOUT 60   //watchdog timer
+#define WDT_TIMEOUT  60  //watchdog timer
+
+//if 1 core doesn't work, try with 2
+#define CONFIG_FREERTOS_NUMBER_OF_CORES 1
+
+esp_task_wdt_config_t twdt_config = {
+    .timeout_ms = WDT_TIMEOUT,
+    .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,    // Bitmask of all cores
+    .trigger_panic = true
+};
 
 #else
 #define WIND_SPD_PIN        26  //reed switch based anemometer count
@@ -160,7 +168,6 @@ struct sensorStatus
   int temperature;
 };
 
-
 //===========================================
 // RTC Memory storage
 //===========================================
@@ -202,7 +209,8 @@ void setup()
   rtc_gpio_set_direction(GPIO_NUM_12, RTC_GPIO_MODE_OUTPUT_ONLY);
   rtc_gpio_set_level(GPIO_NUM_12, 1);
 
-  esp_task_wdt_init(WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+  esp_task_wdt_deinit(); //wdt is enabled by default, so we need to deinit it first
+  esp_task_wdt_init(&twdt_config); //enable panic so ESP32 restarts
   esp_task_wdt_add(NULL); //add current thread to WDT watch
 
   //set hardware pins
@@ -212,26 +220,12 @@ void setup()
   digitalWrite(LED_BUILTIN, LOW);
   Serial.begin(115200);
   delay(25);
-
-
-
-
+  
   //Title message
   MonPrintf("\nWeather station - Deep sleep version.\n");
   MonPrintf("Version %s\n\n", VERSION);
   BlinkLED(1);
   bootCount++;
-
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  printLocalTimeLCD();
-  printADCLCD();
-  display.printf("SSID: %s\n", ssid);
-  display.print("BOOT: ");
-  display.println(bootCount);
-  display.display();
 
   updateWake();
   wakeup_reason();
@@ -248,7 +242,7 @@ void setup()
       printTimeNextWake();
       processSensorUpdates();
       WiFi.disconnect();
-      esp_wifi_stop();
+      //esp_wifi_stop();
     }
   }
 
@@ -300,14 +294,6 @@ void processSensorUpdates(void)
 #endif
   //send sensor data to IOT destination
   sendData(&environment);
-  //send sensor data to MQTT
-  if (App == "MQTT")
-  {
-    SendDataMQTT(&environment);
-  }
-  display.printf("Temp: %4.1f F\n", environment.temperatureF);
-  display.printf("Pressure: %4.1f inHg\n", environment.barometricPressure);
-  display.display();
 }
 
 //===========================================================
@@ -320,9 +306,10 @@ void processSensorUpdates(void)
 void wakeup_reason()
 {
   esp_sleep_wakeup_cause_t wakeup_reason;
-
   wakeup_reason = esp_sleep_get_wakeup_cause();
+  
   MonPrintf("Wakeup reason: %d\n", wakeup_reason);
+  
   switch (wakeup_reason)
   {
     //Rain Tip Gauge

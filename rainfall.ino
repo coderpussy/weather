@@ -11,14 +11,11 @@ void clearRainfall(void)
   memset(&rainfall, 0x00, sizeof(rainfall));
 }
 
-
-
 //=======================================================================
 //
 //  Hourly accumulation routines
 //
 //=======================================================================
-
 
 //=======================================================================
 //  clearRainfallHour: zero out specific hour element of rainfall structure array
@@ -76,7 +73,6 @@ int last24(void)
   return totalRainfall;
 }
 
-
 //=======================================================================
 //
 //  Minute accumulation routines
@@ -84,8 +80,6 @@ int last24(void)
 //=======================================================================
 // NOTE: When speaking of minutes and minute array, we use 5 min as
 // minimum grouping for minute-by-minute rainfall
-
-
 
 //=======================================================================
 //  clearRainfallMinute: zero out specific minute element of rainfall structure array
@@ -144,9 +138,6 @@ int last60min(void)
   MonPrintf("Total rainfall (last 60 minutes): %i\n", totalRainfall);
   return totalRainfall;
 }
-
-
-
 
 //=======================================================================
 //  rainTick: ISR for rain tip gauge count

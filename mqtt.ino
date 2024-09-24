@@ -1,10 +1,9 @@
-//mqtt data send
+#ifdef EnableMQTT
 
-
+#include <PubSubClient.h>
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
 
 //=======================================================================
 //  SendDataMQTT: send MQTT data to broker with 'retain' flag set to TRUE
@@ -100,7 +99,6 @@ void MQTTPublish(const char topic[], int value, bool retain)
   sprintf(payload, "%i", value);
   MQTTSend(topicBuffer, payload, retain);
 }
-
 
 //=======================================================================
 //  MQTTPublish Long: routine to publish int values as strings
@@ -198,3 +196,5 @@ void MQTTSend(char *topicBuffer, char *payload, bool retain)
     retryCount++;
   }
 }
+
+#endif

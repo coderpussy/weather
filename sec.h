@@ -12,20 +12,8 @@
 //===========================================
 //WiFi connection
 //===========================================
-char ssid[] = "ssid"; // WiFi Router ssid
-char pass[] = "password"; // WiFi Router password
-
-//===========================================
-//Blynk connection
-//===========================================
-char auth[] = "password";
-const char* server = "api.blynk.com";
-
-//===========================================
-//Thinkspeak connection
-//===========================================
-const char* thingspeak_server = "api.thingspeak.com";
-const char* api_key = "api_key";
+const char* ssid = "xxxxxxxx";
+const char* pass = "xxxxxxxx";
 
 //===========================================
 //MQTT broker connection
@@ -37,25 +25,30 @@ const char* mqttUser = "username";
 const char* mqttPassword = "password";
 const char mainTopic[20] = "MainTopic/";
 
+//===========================================
+//Local LAMPP connection
+//===========================================
+const char* hostUrl = "192.168.5.74";                                                    // The FQDN or IP address of the local storage device on the network.
+const char* deviceName = "outdoor";                                                      // The name of the device as it should appear in the local storage output e.g. webpage.
+const char* apiKey = "generated_with_generate-password.php";                             // The API key with write permission post data to a local storage. Generated with PHP $hash = password_hash("S47TnP3pp3R", PASSWORD_DEFAULT);
 
 //===========================================
 //Metric or Imperial measurements
 //===========================================
-//#define METRIC
+#define METRIC
 
 //===========================================
 //Use optional NVM for backup
 //This is a failsafe for RESET events out of
 //system control
 //===========================================
-//#define USE_EEPROM
+#define USE_EEPROM
 
 //===========================================
 //BME280 altitude offsets (set by user)
 //===========================================
 #define ALTITUDE_OFFSET_IMPERIAL 5.58
 #define ALTITUDE_OFFSET_METRIC 142.6
-
 
 //===========================================
 //BH1750 Enable
@@ -76,8 +69,8 @@ const char mainTopic[20] = "MainTopic/";
 //===========================================
 //Set how often to wake and read sensors
 //===========================================
-//const int UpdateIntervalSeconds = 15 * 60;  //Sleep timer (900s) for my normal operation
-const int UpdateIntervalSeconds = 5 * 60;  //Sleep timer (60s) testing
+const int UpdateIntervalSeconds = 15 * 60;  //Sleep timer (900s) for my normal operation
+//const int UpdateIntervalSeconds = 5 * 60;  //Sleep timer (60s) testing
 
 //===========================================
 //Battery calibration
@@ -89,11 +82,12 @@ const int UpdateIntervalSeconds = 5 * 60;  //Sleep timer (60s) testing
 //===========================================
 //Timezone information
 //===========================================
-const char* ntpServer = "pool.ntp.org";
+const char* ntpServer = "pool.ntp.org";     // Change this if you have a local timesync e.g. fritz.box ;-)
 const long  gmtOffset_sec = -7 * 3600;
 const int   daylightOffset_sec = 3600;
 
-//========================= Enable Blynk, MQTT or Thingspeak ===================================
-//const String App = "BLYNK";         //  alternative is line below
-//const String App = "Thingspeak"; //  alternative is line above
-const String App = "MQTT";         //  alternative is line below
+//===========================================
+// Enable MQTT and/or Local storage
+//===========================================
+//#define EnableMQTT
+#define EnableLocal
