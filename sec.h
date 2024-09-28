@@ -1,4 +1,11 @@
 //=============================================================
+//Define ESP32 board library version
+//Needed if sketch will be compiled with board version > 3.0
+//Comment it out if you still use version 2.0.x
+//=============================================================
+#define ESP32_3
+
+//=============================================================
 //Variables for wifi server setup and api keys for IOT
 //Constants for WAKE frequency and UOM for sensors
 //=============================================================
@@ -82,7 +89,8 @@ const int UpdateIntervalSeconds = 15 * 60;  //Sleep timer (900s) for my normal o
 //===========================================
 //Timezone information
 //===========================================
-const char* ntpServer = "pool.ntp.org";     // Change this if you have a local timesync e.g. fritz.box ;-)
+//const char* ntpServer = "pool.ntp.org";
+const char* ntpServer = "fritz.box";
 const long  gmtOffset_sec = -7 * 3600;
 const int   daylightOffset_sec = 3600;
 

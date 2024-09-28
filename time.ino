@@ -1,7 +1,7 @@
 struct tm timeinfo;
 
 //=======================================================================
-//  printLocalTime: prints local timezone based time
+// printLocalTime: prints local timezone based time
 //=======================================================================
 void printLocalTime()
 {
@@ -14,16 +14,16 @@ void printLocalTime()
 }
 
 //=======================================================================
-//  printTimeNextWake: diagnostic routine to print next wake time
+// printTimeNextWake: diagnostic routine to print next wake time
 //=======================================================================
-void printTimeNextWake( void)
+void printTimeNextWake(void)
 {
   getLocalTime(&timeinfo);
   Serial.printf("Time to next wake: %i seconds\n", nextUpdate - mktime(&timeinfo) );
 }
 
 //=======================================================================
-//  updateWake: calculate next time to wake
+// updateWake: calculate next time to wake
 //=======================================================================
 void updateWake (void)
 {
@@ -36,11 +36,12 @@ void updateWake (void)
     muliplierBatterySave = 10;
   }
   getLocalTime(&timeinfo);
-  //180 added to wipe out any RTC timing error vs NTP server - causing 2 WAKES back to back
+  
+  // 180 added to wipe out any RTC timing error vs NTP server - causing 2 WAKES back to back
   nextUpdate = mktime(&timeinfo) + UpdateIntervalSeconds * muliplierBatterySave + 180;
   nextUpdate = nextUpdate - nextUpdate % (UpdateIntervalSeconds * muliplierBatterySave);
   // Intentional offset for data aquire before display unit updates
-  // guarantees fresh data
+  // Guarantees fresh data
   if (nextUpdate > 120)
   {
     nextUpdate -= 60;

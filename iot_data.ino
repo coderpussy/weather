@@ -1,5 +1,5 @@
 //=======================================================================
-//  sendData: all sensor data in structure is sent to Blynk or Thingspeak
+// sendData: all sensor data in structure is sent to Blynk or Thingspeak
 //=======================================================================
 void sendData(struct sensorData *environment)
 {

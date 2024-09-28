@@ -2,7 +2,7 @@
 #define EEPROM_I2C_ADDRESS 0x50
 
 //========================================================================
-//  readEEPROM: Read historicalData from NVM
+// readEEPROM: Read historicalData from NVM
 //========================================================================
 void readEEPROM(struct rainfallData *rainfall)
 {
@@ -15,13 +15,13 @@ void readEEPROM(struct rainfallData *rainfall)
   structSize = sizeof(rainfallData);
   memset(buffer, 0, sizeof(structSize));
 
-  //Send dummy write to set addpress register of NVM
+  // Send dummy write to set addpress register of NVM
   Wire.beginTransmission(EEPROM_I2C_ADDRESS);
   Wire.write((int)(address >> 8));
   Wire.write((int)(address & 0xFF));
   Wire.endTransmission();
 
-  //Read rainfall data
+  // Read rainfall data
   for (int location = 0; location < structSize; location++)
   {
     Wire.requestFrom(EEPROM_I2C_ADDRESS, 1);
@@ -36,7 +36,7 @@ void readEEPROM(struct rainfallData *rainfall)
     }
     buffer[location] = c;
   }
-  //If EEPROM contains non-zero values, restore data to historical structure
+  // If EEPROM contains non-zero values, restore data to historical structure
   if (nonZero)
   {
     MonPrintf("\nRestoring rainfall structure from EEPROM\n");
@@ -44,9 +44,8 @@ void readEEPROM(struct rainfallData *rainfall)
   }
 }
 
-
 //========================================================================
-//  writeEEPROM: Conditional write of  historicalData from NVM
+// writeEEPROM: Conditional write of  historicalData from NVM
 // if rainfall has non-zero values, or needs updated to zero
 // boot must be >1 in order for a write to take place, array will never
 // be written on boot = 1
@@ -74,7 +73,7 @@ void writeEEPROM(struct rainfallData *rainfall)
     {
       if (writePosition < structSize)
       {
-        //MonPrintf("position: % 02x: % 02x\n", writePosition, buffer[writePosition]);
+        // MonPrintf("position: % 02x: % 02x\n", writePosition, buffer[writePosition]);
         Wire.write(buffer[writePosition]);
       }
     }
@@ -85,7 +84,7 @@ void writeEEPROM(struct rainfallData *rainfall)
 }
 
 //========================================================================
-//  initEEPROM: Clear NVM to 0x00 where structure is stored
+// initEEPROM: Clear NVM to 0x00 where structure is stored
 //========================================================================
 void initEEPROM(void)
 {
@@ -105,7 +104,7 @@ void initEEPROM(void)
 }
 
 //========================================================================
-//  conditionalWriteEEPROM: Only write EEPROM if something has changed
+// conditionalWriteEEPROM: Only write EEPROM if something has changed
 //========================================================================
 void conditionalWriteEEPROM(struct rainfallData *rainfall)
 {
@@ -118,28 +117,28 @@ void conditionalWriteEEPROM(struct rainfallData *rainfall)
 
   readEEPROM(&historyBuffer);
 
-  //compare EEPROM to RTC structure
-  //look at hourly totals for rainfall mismatch
+  // Compare EEPROM to RTC structure
+  // Look at hourly totals for rainfall mismatch
   for (int hour = 0; hour < 24; hour++)
   {
     if (historyBuffer.hourlyRainfall[hour] != rainfall->hourlyRainfall[hour])
     {
-      //MonPrintf("Hourly rainfall: %i\n", rainfall->hourlyRainfall[hour]);
+      // MonPrintf("Hourly rainfall: %i\n", rainfall->hourlyRainfall[hour]);
       match = false;
     }
   }
 
-  //look at minute totals for rainfall mismatch
+  // Look at minute totals for rainfall mismatch
   for (int hour = 0; hour < 12; hour++)
   {
     if (historyBuffer.current60MinRainfall[hour] != rainfall->current60MinRainfall[hour])
     {
-      //MonPrintf("This hour rainfall: %i\n", rainfall->current60MinRainfall[hour]);
+      // MonPrintf("This hour rainfall: %i\n", rainfall->current60MinRainfall[hour]);
       match = false;
     }
   }
 
-  //if mismatch exists, write EEPROM
+  // If mismatch exists, write EEPROM
   if (!match)
   {
     writeEEPROM(rainfall);

@@ -7,9 +7,9 @@ extern const char* deviceName;
 extern const char* apiKey;
 
 //=======================================================================
-//  SendDataLocal: send data to local network LAMPP stack
+// SendDataLocal: send data to local network LAMPP stack
 //=======================================================================
-void SendDataLocal (struct sensorData *environment)
+void SendDataLocal(struct sensorData *environment)
 {
   int hourPtr = timeinfo.tm_hour;
   

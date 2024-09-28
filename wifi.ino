@@ -1,5 +1,5 @@
 //=======================================================================
-//  wifi_connect: connect to WiFi or explicitly connect to Blynk, if used
+// wifi_connect: connect to WiFi or explicitly connect to Blynk, if used
 //=======================================================================
 long wifi_connect()
 {

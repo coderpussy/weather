@@ -6,9 +6,9 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 //=======================================================================
-//  SendDataMQTT: send MQTT data to broker with 'retain' flag set to TRUE
+// SendDataMQTT: send MQTT data to broker with 'retain' flag set to TRUE
 //=======================================================================
-void SendDataMQTT (struct sensorData *environment)
+void SendDataMQTT(struct sensorData *environment)
 {
   char bufferTempF[5];
   char bufferTempC[5];
@@ -42,15 +42,16 @@ void SendDataMQTT (struct sensorData *environment)
   MQTTPublish("windDirection/", (int)environment->windDirection, true);
   MQTTPublish("windCardinalDirection/", environment->windCardinalDirection, true);
   MQTTPublish("photoresistor/", (int)environment->photoresistor, true);
-#ifndef METRIC
-  MQTTPublish("rainfallInterval/", (float) (rainfall.intervalRainfall * 0.011), true);
-  MQTTPublish("rainfall/", (float) (rainfall.hourlyRainfall[hourPtr] * 0.011), true);
-  MQTTPublish("rainfall24/", (float) (last24() * 0.011), true);
-#else
-  MQTTPublish("rainfallInterval/", (float) (rainfall.intervalRainfall * 0.011 * 25.4), true);
-  MQTTPublish("rainfall/", (float) (rainfall.hourlyRainfall[hourPtr] * 0.011 * 25.4), true);
-  MQTTPublish("rainfall24/", (float) (last24() * 0.011 * 25.4), true);
-#endif
+  
+  #ifndef METRIC
+    MQTTPublish("rainfallInterval/", (float) (rainfall.intervalRainfall * 0.011), true);
+    MQTTPublish("rainfall/", (float) (rainfall.hourlyRainfall[hourPtr] * 0.011), true);
+    MQTTPublish("rainfall24/", (float) (last24() * 0.011), true);
+  #else
+    MQTTPublish("rainfallInterval/", (float) (rainfall.intervalRainfall * 0.011 * 25.4), true);
+    MQTTPublish("rainfall/", (float) (rainfall.hourlyRainfall[hourPtr] * 0.011 * 25.4), true);
+    MQTTPublish("rainfall24/", (float) (last24() * 0.011 * 25.4), true);
+  #endif
 
   MQTTPublish("batteryVoltage/", environment->batteryVoltage, true);
   MQTTPublish("lux/", environment->lux, true);
@@ -69,7 +70,7 @@ void SendDataMQTT (struct sensorData *environment)
 }
 
 //=======================================================================
-//  MQTTPublishString: routine to publish string
+// MQTTPublishString: routine to publish string
 //=======================================================================
 void MQTTPublish(const char topic[], char *value, bool retain)
 {
@@ -85,7 +86,7 @@ void MQTTPublish(const char topic[], char *value, bool retain)
 }
 
 //=======================================================================
-//  MQTTPublishInt: routine to publish int values as strings
+// MQTTPublishInt: routine to publish int values as strings
 //=======================================================================
 void MQTTPublish(const char topic[], int value, bool retain)
 {
@@ -101,7 +102,7 @@ void MQTTPublish(const char topic[], int value, bool retain)
 }
 
 //=======================================================================
-//  MQTTPublish Long: routine to publish int values as strings
+// MQTTPublish Long: routine to publish int values as strings
 //=======================================================================
 void MQTTPublish(const char topic[], long value, bool retain)
 {
@@ -117,7 +118,7 @@ void MQTTPublish(const char topic[], long value, bool retain)
 }
 
 //=======================================================================
-//  MQTTPublishFloat: routine to publish float values as strings
+// MQTTPublishFloat: routine to publish float values as strings
 //=======================================================================
 void MQTTPublish(const char topic[], float value, bool retain)
 {
@@ -133,7 +134,7 @@ void MQTTPublish(const char topic[], float value, bool retain)
 }
 
 //=======================================================================
-//  MQTTPublishBool: routine to publish bool values as strings
+// MQTTPublishBool: routine to publish bool values as strings
 //=======================================================================
 void MQTTPublish(const char topic[], bool value, bool retain)
 {
@@ -156,9 +157,10 @@ void MQTTPublish(const char topic[], bool value, bool retain)
 }
 
 //=======================================================================
-//  reconnect: MQTT reconnect
+// reconnect: MQTT reconnect
 //=======================================================================
-void reconnect() {
+void reconnect()
+{
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -177,21 +179,21 @@ void reconnect() {
 }
 
 //=======================================================================
-//  MQTTSend: MQTT send topic with value to broker
+// MQTTSend: MQTT send topic with value to broker
 //=======================================================================
 void MQTTSend(char *topicBuffer, char *payload, bool retain)
 {
   int status = 0;
   int retryCount = 0;
-#ifdef ExtendedMQTT
-  MonPrintf("%s: %s\n", topicBuffer, payload);
-#endif
+  #ifdef ExtendedMQTT
+    MonPrintf("%s: %s\n", topicBuffer, payload);
+  #endif
   while (!status && retryCount < 5)
   {
     status = client.publish(topicBuffer, payload, retain);
-#ifdef ExtendedMQTT
-    MonPrintf("MQTT status: %i\n", status);
-#endif
+    #ifdef ExtendedMQTT
+        MonPrintf("MQTT status: %i\n", status);
+    #endif
     delay(50);
     retryCount++;
   }
