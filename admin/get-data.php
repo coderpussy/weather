@@ -19,9 +19,16 @@
         die("Database Connection failed: " . $conn->connect_error);
     }
 
-    // SQL query
-    $sql = 'SELECT * FROM `sensors` WHERE `name`="' . $device . '" AND `TimeStamp` >= NOW() - INTERVAL 1 DAY ORDER BY TimeStamp ASC';
+    //$sql = "SELECT * FROM sensors ORDER BY TimeStamp DESC LIMIT 1";
+    //$sql = 'SELECT * FROM `sensors` WHERE `name`="' . $device . '" AND `Date`="' . date('Y-m-d') . '" ORDER BY Time ASC';
 
+    if ($device == 'Balkon') {
+        $sql = 'SELECT * FROM `sensors` JOIN `outdoor_sensors`
+            ON `sensors`.`id` = `outdoor_sensors`.`sensors_id`
+            WHERE `sensors`.`name` = "' . $device . '" AND `sensors`.`TimeStamp` >= NOW() - INTERVAL 1 DAY ORDER BY `sensors`.`TimeStamp` ASC';
+    } else {
+        $sql = 'SELECT * FROM `sensors` WHERE `name`="' . $device . '" AND `TimeStamp` >= NOW() - INTERVAL 1 DAY ORDER BY TimeStamp ASC';
+    }
     $result = $conn->query($sql);
 
     $row = '';
@@ -49,13 +56,11 @@
 
             $i++;
         }
-    }/* else {
+    } else {
         echo "0 results";
-    }*/
+    }
 
     $conn->close();
 
-    if(!empty($dataarray)) {
-        echo json_encode($dataarray);
-    }
+    echo json_encode($dataarray);
 ?>
