@@ -2,9 +2,9 @@
 
 #include <HTTPClient.h>  // To send HTTP requests.
 
-extern const char* hostUrl;
-extern const char* deviceName;
-extern const char* apiKey;
+//extern const char* hostUrl;
+//extern const char* deviceName;
+//extern const char* apiKey;
 
 //=======================================================================
 // SendDataLocal: send data to local network LAMPP stack
@@ -22,6 +22,7 @@ void SendDataLocal(struct sensorData *environment)
   postStr += "\"temperature\": \"" + String(environment->BMEtemperature) + "\",";
   postStr += "\"humidity\": \"" + String(environment->humidity) + "\",";
   postStr += "\"pressure\": \"" + String(environment->barometricPressure) + "\",";
+  postStr += "\"altitude\": \"0.00\",";
   
   #ifdef METRIC
     postStr += "\"temperature_out\": \"" + String(environment->temperatureC) + "\",";

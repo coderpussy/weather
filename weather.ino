@@ -6,12 +6,17 @@
 //
 // partially recoded by coderpussy
 
-#define VERSION "1.3.4"
+#define VERSION "1.3.5"
 
 //=============================================
 // Changelog
 //=============================================
 /*
+ * v1.3.5
+ *      1. Easy way for OTA firmware update implemented
+ *         - Config switch available
+ *         - If in use make sure you have a fully working end-point for this (e.g. LAMP stack)
+ *
  * v1.3.4
  *      1. Removed Blynk, Thingspeak and added local network LAMP stack based data storage
  *      2. Adjusted Watchdog timer initialization due to new esp32 board library Major version change v.3.x
@@ -74,6 +79,7 @@
 
 #include <BME280I2C.h>
 #include <Adafruit_SI1145.h>
+
 #include <stdarg.h>
 #include <soc/soc.h>
 #include <soc/rtc_cntl_reg.h>
@@ -185,8 +191,10 @@ RTC_DATA_ATTR unsigned int elapsedTime = 0;
 #ifdef BH1750Enable
   BH1750 lightMeter(0x23);
 #endif
+
 BME280I2C bme;
 Adafruit_SI1145 uv = Adafruit_SI1145();
+
 bool lowBattery = false;
 bool WiFiEnable = false;
 struct sensorStatus status;
@@ -240,6 +248,12 @@ void setup()
     rssi = wifi_connect();
     if (rssi != RSSI_INVALID)
     {
+      #ifdef EnableOTA
+        MonPrintf("\nExecute Over-The-Air Updater...\n");
+        OTAUpdater();
+        MonPrintf("Over-The-Air Updater DONE.\n\n");
+      #endif
+      
       sensorEnable();
       sensorStatusToConsole();
       // Calibrate Clock - My ESP RTC is noticibly fast
@@ -251,7 +265,7 @@ void setup()
       //esp_wifi_stop();
     }
   }
-
+  
   UpdateIntervalModified = nextUpdate - mktime(&timeinfo);
   if (UpdateIntervalModified < 3)
   {
