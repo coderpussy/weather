@@ -11,13 +11,13 @@ void OTAUpdater() {
   
   switch(ret) {
       case HTTP_UPDATE_FAILED:
-          Serial.printf("Update Error (%d): %s\r\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
+          MonPrintf("Update Error (%d): %s\r\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
           break;
       case HTTP_UPDATE_NO_UPDATES:
-          Serial.println("No update available");
+          MonPrintf("No update available\n");
           break;
       case HTTP_UPDATE_OK:
-          Serial.println("Update OK");
+          MonPrintf("Update OK\n");
           break;
   }
 

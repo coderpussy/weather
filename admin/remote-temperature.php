@@ -12,6 +12,8 @@
 
             // if api key is valid
             if(password_verify($passwordsalt,$obj->apikey)) {
+                //$fp = file_put_contents('remote-temperature.log', $json);
+
                 // Connect to database
                 $servername = "localhost";
                 $username = "solartherm";
@@ -34,6 +36,7 @@
                 $last_id = '';
                 $status_msg = '';
                 $status_msg2 = '';
+                $status_msg3 = '';
 
                 // If basic json objects are not empty
                 if(!empty($obj->name) || !empty($obj->temperature) || !empty($obj->humidity) || !empty($obj->battery)) {
@@ -74,11 +77,25 @@
                             $status_msg2 = "Error: " . $sql2 . "<br>" . $conn->error;
                         }
                     }
+
+                    if(!empty($last_id) && !empty($obj->boot_log)) {
+                        $boot_log = $obj->boot_log;
+
+                        // Create new db table record
+                        $sql3 = "INSERT INTO boot_log (sensors_id, boot_log) VALUES ('".$last_id."', '".$boot_log."')";
+
+                        if ($conn->query($sql3) === TRUE) {
+                            $status_msg3 = "OK";
+                        } else {
+                            $status_msg3 = "Error: " . $sql3 . "<br>" . $conn->error;
+                        }
+                    }
                 }
 
-                if (!empty($status_msg) || !empty($status_msg2)) {
+                if (!empty($status_msg) || !empty($status_msg2) || !empty($status_msg3)) {
                     echo $status_msg;
                     echo $status_msg2;
+                    echo $status_msg3;
                 }
 
                 // Close connection

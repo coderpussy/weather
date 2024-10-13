@@ -37,7 +37,7 @@ void readWindSpeed(struct sensorData *environment)
   }
   else
   {
-    MonPrintf("No Wind data");
+    MonPrintf("No Wind data\n");
     windSpeed = 0;
   }
   // I see 2 ticks per revolution

@@ -6,12 +6,17 @@
 //
 // partially recoded by coderpussy
 
-#define VERSION "1.3.5"
+#define VERSION "1.3.6"
 
 //=============================================
 // Changelog
 //=============================================
 /*
+ * v1.3.6
+ *      1. Boot log can be enabled and stored into LAMP stack db encoded in base64 (for now it's just implemented for local LAMP)
+ *         - If something goes strange during setup routine, this can help to analyze issues
+ *         - base64 isn't the best solution for this and could change in the future
+ *
  * v1.3.5
  *      1. Easy way for OTA firmware update implemented
  *         - Config switch available
@@ -200,6 +205,10 @@ bool WiFiEnable = false;
 struct sensorStatus status;
 long rssi = 0;
 
+#ifdef EnableBootLog
+  String bootLog = "";
+#endif
+
 //===========================================
 // ISR Prototypes
 //===========================================
@@ -379,13 +388,16 @@ void sleepyTime(long UpdateIntervalModified)
 // MonPrintf: diagnostic printf to terminal
 //===========================================
 void MonPrintf(const char* format, ...) {
-  char buffer[500];
+  char buffer[200];
   va_list args;
   va_start(args, format);
   vsprintf(buffer, format, args);
   va_end(args);
   #ifdef SerialMonitor
     Serial.printf("%s", buffer);
+  #endif
+  #ifdef EnableBootLog
+    bootLog += String(buffer);
   #endif
 }
 

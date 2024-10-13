@@ -2,9 +2,9 @@
 
 #include <HTTPClient.h>  // To send HTTP requests.
 
-//extern const char* hostUrl;
-//extern const char* deviceName;
-//extern const char* apiKey;
+#ifdef EnableBootLog
+  #include "base64.h"
+#endif
 
 //=======================================================================
 // SendDataLocal: send data to local network LAMPP stack
@@ -14,7 +14,7 @@ void SendDataLocal(struct sensorData *environment)
   int hourPtr = timeinfo.tm_hour;
   
   String url = String(hostUrl) + "/remote-temperature.php";
-  MonPrintf("LocalStorageClient: Sending POST request to LocalStorage at %s\n", url);
+  MonPrintf("LocalStorageClient: Sending POST request to LocalStorage at %s\n", url.c_str());
   
   String postStr = "";
   postStr += "{ \"apikey\": \"" + String(apiKey) + "\",";
@@ -43,9 +43,18 @@ void SendDataLocal(struct sensorData *environment)
   postStr += "\"lux\": \"" + String(environment->lux) + "\",";
   
   postStr += "\"boot_count\": \"" + String(bootCount) + "\",";
-  postStr += "\"battery\": \"" + String(environment->batteryVoltage) + "\" }";
+  postStr += "\"battery\": \"" + String(environment->batteryVoltage) + "\"";
 
-  MonPrintf("LocalStorageClient: HTTP request body: %s\n", postStr);
+  #ifdef EnableBootLog
+    String bootLogEncoded = base64::encode(String(bootLog));
+    postStr += ",\"boot_log\": \"" + bootLogEncoded + "\" }";
+
+    MonPrintf("LocalStorageClient: HTTP request body with boot log\n");
+  #else
+    postStr += "}";
+
+    MonPrintf("LocalStorageClient: HTTP request body: %s\n", postStr.c_str());
+  #endif
 
   HTTPClient http;
   http.begin(url);
